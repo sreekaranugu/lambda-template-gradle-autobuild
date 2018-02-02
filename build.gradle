@@ -1,0 +1,75 @@
+
+group 'com.sreekar'
+version '1.0-SNAPSHOT'
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
+    }
+}
+
+apply plugin: 'com.github.johnrengelman.shadow'
+
+repositories {
+    mavenCentral()
+}
+
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "jp.classmethod.aws:gradle-aws-plugin:0.35"
+    }
+}
+
+import jp.classmethod.aws.gradle.lambda.AWSLambdaMigrateFunctionTask
+
+apply plugin: 'java'
+apply plugin: "base"
+apply plugin: "jp.classmethod.aws.lambda"
+apply plugin: 'idea'
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
+sourceCompatibility = 1.8
+
+dependencies {
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-core', version: '1.11.271'
+    compile group: 'com.amazonaws', name: 'aws-lambda-java-events', version: '2.0.2'
+    compile group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.0'
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-lambda', version: '1.11.271'
+}
+
+aws {
+    profileName = "default"
+    region = "us-east-2"
+}
+
+lambda {
+    region = "us-east-2"
+}
+
+def jarFilePath = 'build/libs/'
+jarFilePath = jarFilePath + rootProject.name + '-'
+jarFilePath = jarFilePath + rootProject.version
+jarFilePath = jarFilePath + '-all.jar'
+
+
+task deploy(type: AWSLambdaMigrateFunctionTask, dependsOn: shadowJar) {
+    functionName = "xxxxx"
+    role = "arn:aws:iam::xxxxx:role/xxxxx"
+    zipFile = file(jarFilePath)
+    handler = "com.sreekar.Main::handleRequest"
+}
+

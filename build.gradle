@@ -28,6 +28,9 @@ buildscript {
     }
 }
 
+
+import com.amazonaws.services.lambda.model.InvocationType
+import jp.classmethod.aws.gradle.lambda.AWSLambdaInvokeTask
 import jp.classmethod.aws.gradle.lambda.AWSLambdaMigrateFunctionTask
 
 apply plugin: 'java'
@@ -71,5 +74,14 @@ task deploy(type: AWSLambdaMigrateFunctionTask, dependsOn: shadowJar) {
     role = "arn:aws:iam::xxxxx:role/xxxxx"
     zipFile = file(jarFilePath)
     handler = "com.sreekar.Main::handleRequest"
+}
+
+task invoke(type: AWSLambdaInvokeTask) {
+    functionName = "fbi_function"
+    invocationType = InvocationType.RequestResponse
+    payload = "{}"
+    doLast {
+        println "Lambda function result: " + new String(invokeResult.payload.array(), "UTF-8")
+    }
 }
 
